@@ -116,18 +116,19 @@ if "history" not in st.session_state:
     }
 
 # Sidebar Controls
-st.sidebar.title("⚡ Hardware Monitor")
-st.sidebar.markdown(f"**Host:** `{platform.node()}`")
-st.sidebar.markdown(f"**OS:** `{platform.system()} {platform.release()}`")
+st.sidebar.title("⚡ ניטור חומרה")
+st.sidebar.markdown(f"**מחשב / שרת:** `{platform.node()}`")
+st.sidebar.markdown(f"**מערכת הפעלה:** `{platform.system()} {platform.release()}`")
 
-refresh_rate = st.sidebar.slider("Auto-Refresh Interval (Seconds)", min_value=1, max_value=10, value=2)
-enable_refresh = st.sidebar.toggle("Enable Live Auto-Refresh", value=True)
+refresh_rate = st.sidebar.slider("קצב רענון נתונים (שניות)", min_value=1, max_value=10, value=2)
+enable_refresh = st.sidebar.toggle("רענון חי אוטומטי", value=True)
 
 # Diagnostic Simulation Mode (for testing advice under severe conditions)
 st.sidebar.markdown("---")
-st.sidebar.subheader("🛠️ Fault Simulation Mode")
-simulate_overheat = st.sidebar.checkbox("Simulate CPU Overheat (>92°C & Throttle)", value=False)
-simulate_disk_lag = st.sidebar.checkbox("Simulate Downloads Folder Lag (450ms & Queue > 3)", value=False)
+st.sidebar.subheader("🛠️ בדיקת תקלות (הדמיה)")
+st.sidebar.caption("סמן כאן כדי לראות איך הדשבורד מגיב לתקלות חומרה:")
+simulate_overheat = st.sidebar.checkbox("🔥 הדמה מעבד רותח (94°C והאטה)", value=False)
+simulate_disk_lag = st.sidebar.checkbox("📂 הדמה תקיעה ב-Downloads (480ms)", value=False)
 
 # Auto-refresh handling
 try:
@@ -193,6 +194,113 @@ advisories = st.session_state.advisor_engine.evaluate(
 # -------------------------------------------------------------
 st.title("🖥️ PC Hardware Diagnostics & Telemetry Dashboard")
 st.markdown("Real-time telemetry and rule-based diagnostic advisor for CPU Thermals and Windows File Explorer bottlenecks.")
+
+# =============================================================
+# לוח תובנות והמלצות מהירות בעברית (בראש הדף למעלה!)
+# =============================================================
+# חישוב סטטוס מעבד בעברית
+cpu_temp_val = cpu_data.get("package_temp")
+cpu_throttle = cpu_data.get("is_throttling", False)
+cpu_load_val = cpu_data.get("total_percent", 0.0)
+
+if cpu_throttle or (cpu_temp_val and cpu_temp_val >= 90):
+    cpu_hebrew_status = "⚠️ קריטי: המעבד רותח ויש האטה מכוונת (Thermal Throttling)!"
+    cpu_hebrew_badge = "סכנה / האטה פעילה"
+    cpu_hebrew_color = "#ef4444"
+    cpu_hebrew_why = f"המעבד הגיע ל-{cpu_temp_val}°C. כדי לא להישרף, המעבד מוריד בעצמו את מהירות השעון, והמחשב נהיה איטי ונתקע."
+    cpu_hebrew_action = """
+    **מה לעשות תכל'ס?**
+    1. **החלף משחה תרמית:** המשחה בין המעבד לגוף הקירור התייבשה (יש לנקות באלכוהול 99% ולמרוח מחדש).
+    2. **בדוק קירור מים (AIO):** גע בשני הצינורות – אם אחד רותח והשני קר, משאבת המים שבקה חיים או שיש בועת אוויר.
+    3. **נקה אבק:** נשוף אוויר דחוס על צלעות הקירור והמאווררים.
+    4. **הגדר מאווררים ב-BIOS:** כוון ל-100% מהירות מעל 75°C.
+    """
+elif cpu_temp_val and cpu_temp_val >= 80:
+    cpu_hebrew_status = "⚡ אזהרה: טמפרטורת מעבד גבוהה מהרצוי"
+    cpu_hebrew_badge = "דורש תשומת לב"
+    cpu_hebrew_color = "#f59e0b"
+    cpu_hebrew_why = f"טמפרטורת המעבד עומדת על {cpu_temp_val}°C. המחשב עדיין לא מאט, אך הוא קרוב לגבול."
+    cpu_hebrew_action = """
+    **מה לעשות תכל'ס?**
+    1. שפר את זרימת האוויר במארז (ודא שמאווררי ההכנסה מכניסים יותר אוויר ממה שמוצא).
+    2. בטל ב-BIOS את הגדרת Multi-Core Enhancement כדי למנוע מתח יתר מיותר.
+    """
+else:
+    cpu_temp_display = f"{cpu_temp_val}°C" if cpu_temp_val else "לא נמדד (דורש הרצה כמנהל במחשב)"
+    cpu_hebrew_status = "✅ מעבד במצב תקין"
+    cpu_hebrew_badge = "תקין"
+    cpu_hebrew_color = "#10b981"
+    cpu_hebrew_why = f"המעבד פועל בטמפרטורה ובעומס רגילים ({cpu_temp_display}, עומס {cpu_load_val}%)."
+    cpu_hebrew_action = "אין צורך בפעולה כרגע. הקירור פועל כסדרו."
+
+# חישוב סטטוס Downloads בעברית
+diag_latency = diag_data.get("scan_latency_ms", 0.0)
+diag_files = diag_data.get("total_files", 0)
+diag_template = diag_data.get("folder_template", "")
+diag_incomplete = diag_data.get("incomplete_downloads", 0)
+diag_thumb_mb = diag_data.get("thumbnail_cache_size_mb", 0.0)
+disk_q = disk_data.get("queue_length", 0.0)
+
+if diag_latency > 300 or "Media" in diag_template or diag_files > 600 or diag_thumb_mb > 300:
+    down_hebrew_status = "⚠️ זוהתה בעיית איטיות קשה בפתיחת תיקיית Downloads!"
+    down_hebrew_badge = "דורש תיקון מיידי"
+    down_hebrew_color = "#ef4444"
+    reasons_list = []
+    if "Media" in diag_template:
+        reasons_list.append("ווינדוס סיווג את התיקייה כ'תמונות/וידאו' ומנסה לחלץ תמונות ממוזערות מכל קובץ")
+    if diag_files > 600:
+        reasons_list.append(f"עומס של {diag_files} קבצים זרוקים בתיקייה הראשית")
+    if diag_thumb_mb > 300:
+        reasons_list.append(f"קובץ המטמון של התמונות הממוזערות (Thumbnails) נפוח או פגום ({diag_thumb_mb} MB)")
+    if diag_incomplete > 0:
+        reasons_list.append(f"{diag_incomplete} קבצי הורדה שנתקעו (.crdownload) ונועלים את הכונן")
+
+    down_hebrew_why = " • ".join(reasons_list) if reasons_list else f"זמן פתיחת התיקייה איטי מאוד ({diag_latency}ms לעומת פחות מ-50ms ברגיל)."
+    down_hebrew_action = """
+    **איך לתקן ב-3 צעדים פשוטים?**
+    1. **הגדרת התיקייה כ'כללית':** קליק ימני על תיקיית Downloads במחשב ⬅️ **מאפיינים (Properties)** ⬅️ לשונית **התאמה אישית (Customize)** ⬅️ שנה ל-**"פריטים כלליים" (General items)** וסמן V בתיבה "החל גם על תיקיות משנה".
+    2. **מחיקת קבצי הורדה תקועים:** חפש קבצים שמסתיימים ב-`.crdownload` או `.tmp` ומחק אותם.
+    3. **איפוס מטמון התמונות הממוזערות:** הרץ את פקודת ה-PowerShell המופיעה למטה.
+    """
+else:
+    down_hebrew_status = "✅ תיקיית Downloads והדיסק מגיבים מהר"
+    down_hebrew_badge = "תקין"
+    down_hebrew_color = "#10b981"
+    down_hebrew_why = f"זמן סריקת התיקייה מהיר ({diag_latency}ms, סה\"כ {diag_files} קבצים)."
+    down_hebrew_action = "הביצועים תקינים. מומלץ לארגן קבצים ישנים בתיקיות משנה לפי חודשים."
+
+st.markdown(f"""
+<div style="direction: rtl; text-align: right; background: #1e293b; border-radius: 12px; padding: 22px; margin-bottom: 24px; border: 2px solid #3b82f6; box-shadow: 0 6px 16px rgba(0,0,0,0.3);">
+    <h2 style="color: #60a5fa; margin-top: 0; margin-bottom: 8px; font-size: 1.5rem;">📋 תובנות והצעות לפעולה (במבט חטוף)</h2>
+    <p style="color: #94a3b8; margin-bottom: 16px; font-size: 0.95rem;">ריכוז פשוט ותכליתי של הממצאים העיקריים בלי מונחים מסובכים:</p>
+    
+    <!-- תובנה 1: מעבד -->
+    <div style="background: #0f172a; border-radius: 8px; padding: 16px; border-right: 6px solid {cpu_hebrew_color}; margin-bottom: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="font-size: 1.15rem; color: #f8fafc;">🔥 1. אבחון חום המעבד (CPU):</strong>
+            <span style="background-color: {cpu_hebrew_color}; color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;">{cpu_hebrew_badge}</span>
+        </div>
+        <p style="color: #cbd5e1; margin: 4px 0 8px 0; font-size: 1rem;"><strong>המצב:</strong> {cpu_hebrew_status}</p>
+        <p style="color: #94a3b8; margin: 4px 0 8px 0; font-size: 0.9rem;"><strong>למה זה קורה?</strong> {cpu_hebrew_why}</p>
+        <div style="background: #1e293b; padding: 10px 14px; border-radius: 6px; color: #e2e8f0; font-size: 0.9rem; line-height: 1.5;">
+            {cpu_hebrew_action}
+        </div>
+    </div>
+
+    <!-- תובנה 2: תיקיית הורדות -->
+    <div style="background: #0f172a; border-radius: 8px; padding: 16px; border-right: 6px solid {down_hebrew_color}; margin-bottom: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="font-size: 1.15rem; color: #f8fafc;">📂 2. אבחון תקיעת תיקיית Downloads (ווינדוס):</strong>
+            <span style="background-color: {down_hebrew_color}; color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;">{down_hebrew_badge}</span>
+        </div>
+        <p style="color: #cbd5e1; margin: 4px 0 8px 0; font-size: 1rem;"><strong>המצב:</strong> {down_hebrew_status}</p>
+        <p style="color: #94a3b8; margin: 4px 0 8px 0; font-size: 0.9rem;"><strong>למה זה נתקע?</strong> {down_hebrew_why}</p>
+        <div style="background: #1e293b; padding: 10px 14px; border-radius: 6px; color: #e2e8f0; font-size: 0.9rem; line-height: 1.5;">
+            {down_hebrew_action}
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # Top Status Indicators
 status_col1, status_col2, status_col3 = st.columns(3)
