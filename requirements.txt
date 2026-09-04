@@ -1,13 +1,11 @@
-# Core Telemetry & Windows API
+# Cross-Platform Core Packages
 psutil>=5.9.8
-pywin32>=306
-wmi>=1.5.1
-
-# Real-Time Dashboard UI
 streamlit>=1.35.0
 streamlit-autorefresh>=1.0.1
 plotly>=5.22.0
 pandas>=2.2.2
-
-# Remote Access & Permanent Public Tunnel
 pyngrok>=7.1.6
+
+# Windows-Specific Telemetry (Installed automatically on Windows, skipped on Linux Cloud)
+pywin32>=306; sys_platform == 'win32'
+wmi>=1.5.1; sys_platform == 'win32'
