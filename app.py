@@ -31,24 +31,28 @@ st.set_page_config(
 st.markdown("""
 <style>
     .metric-card {
-        background: linear-gradient(135deg, #1e222d 0%, #151821 100%);
-        border: 1px solid #2d3343;
+        background: #1e2433;
+        border: 1px solid #374151;
         border-radius: 10px;
         padding: 16px;
         margin-bottom: 12px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     }
     .metric-header {
         font-size: 0.85rem;
-        color: #8a99ad;
+        color: #9ca3af;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         margin-bottom: 6px;
+        font-weight: 600;
     }
     .metric-value {
         font-size: 1.8rem;
         font-weight: 700;
-        color: #f3f4f6;
+        color: #ffffff !important;
+    }
+    .metric-card caption, .metric-card p, .metric-card span {
+        color: #d1d5db !important;
     }
     .badge-critical {
         background-color: #ef4444;
