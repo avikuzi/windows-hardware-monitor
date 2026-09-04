@@ -1,0 +1,13 @@
+# Core Telemetry & Windows API
+psutil>=5.9.8
+pywin32>=306
+wmi>=1.5.1
+
+# Real-Time Dashboard UI
+streamlit>=1.35.0
+streamlit-autorefresh>=1.0.1
+plotly>=5.22.0
+pandas>=2.2.2
+
+# Remote Access & Permanent Public Tunnel
+pyngrok>=7.1.6
