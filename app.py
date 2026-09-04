@@ -269,38 +269,38 @@ else:
     down_hebrew_why = f"זמן סריקת התיקייה מהיר ({diag_latency}ms, סה\"כ {diag_files} קבצים)."
     down_hebrew_action = "הביצועים תקינים. מומלץ לארגן קבצים ישנים בתיקיות משנה לפי חודשים."
 
-st.markdown(f"""
-<div style="direction: rtl; text-align: right; background: #1e293b; border-radius: 12px; padding: 22px; margin-bottom: 24px; border: 2px solid #3b82f6; box-shadow: 0 6px 16px rgba(0,0,0,0.3);">
-    <h2 style="color: #60a5fa; margin-top: 0; margin-bottom: 8px; font-size: 1.5rem;">📋 תובנות והצעות לפעולה (במבט חטוף)</h2>
-    <p style="color: #94a3b8; margin-bottom: 16px; font-size: 0.95rem;">ריכוז פשוט ותכליתי של הממצאים העיקריים בלי מונחים מסובכים:</p>
-    
-    <!-- תובנה 1: מעבד -->
-    <div style="background: #0f172a; border-radius: 8px; padding: 16px; border-right: 6px solid {cpu_hebrew_color}; margin-bottom: 14px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <strong style="font-size: 1.15rem; color: #f8fafc;">🔥 1. אבחון חום המעבד (CPU):</strong>
-            <span style="background-color: {cpu_hebrew_color}; color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;">{cpu_hebrew_badge}</span>
-        </div>
-        <p style="color: #cbd5e1; margin: 4px 0 8px 0; font-size: 1rem;"><strong>המצב:</strong> {cpu_hebrew_status}</p>
-        <p style="color: #94a3b8; margin: 4px 0 8px 0; font-size: 0.9rem;"><strong>למה זה קורה?</strong> {cpu_hebrew_why}</p>
-        <div style="background: #1e293b; padding: 10px 14px; border-radius: 6px; color: #e2e8f0; font-size: 0.9rem; line-height: 1.5;">
-            {cpu_hebrew_action}
-        </div>
-    </div>
+# הצגת לוח התובנות באמצעות רכיבי Streamlit מקוריים ונקיים
+with st.container(border=True):
+    st.markdown("### 📋 תובנות והצעות לפעולה (במבט חטוף)")
+    st.caption("ריכוז פשוט ותכליתי של הממצאים העיקריים בלי מונחים מסובכים:")
 
-    <!-- תובנה 2: תיקיית הורדות -->
-    <div style="background: #0f172a; border-radius: 8px; padding: 16px; border-right: 6px solid {down_hebrew_color}; margin-bottom: 14px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <strong style="font-size: 1.15rem; color: #f8fafc;">📂 2. אבחון תקיעת תיקיית Downloads (ווינדוס):</strong>
-            <span style="background-color: {down_hebrew_color}; color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;">{down_hebrew_badge}</span>
-        </div>
-        <p style="color: #cbd5e1; margin: 4px 0 8px 0; font-size: 1rem;"><strong>המצב:</strong> {down_hebrew_status}</p>
-        <p style="color: #94a3b8; margin: 4px 0 8px 0; font-size: 0.9rem;"><strong>למה זה נתקע?</strong> {down_hebrew_why}</p>
-        <div style="background: #1e293b; padding: 10px 14px; border-radius: 6px; color: #e2e8f0; font-size: 0.9rem; line-height: 1.5;">
-            {down_hebrew_action}
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+    col_h_cpu, col_h_down = st.columns(2)
+
+    with col_h_cpu:
+        st.markdown("#### 🔥 1. אבחון חום המעבד (CPU)")
+        if cpu_throttle or (cpu_temp_val and cpu_temp_val >= 90):
+            st.error(cpu_hebrew_status)
+        elif cpu_temp_val and cpu_temp_val >= 80:
+            st.warning(cpu_hebrew_status)
+        else:
+            st.success(cpu_hebrew_status)
+
+        st.info(f"**למה זה קורה?** {cpu_hebrew_why}")
+
+        with st.expander("🛠️ מה לעשות תכל'ס? (לחץ כאן)", expanded=True):
+            st.markdown(cpu_hebrew_action)
+
+    with col_h_down:
+        st.markdown("#### 📂 2. אבחון תיקיית Downloads")
+        if diag_latency > 300 or "Media" in diag_template or diag_files > 600 or diag_thumb_mb > 300:
+            st.error(down_hebrew_status)
+        else:
+            st.success(down_hebrew_status)
+
+        st.info(f"**למה זה נתקע?** {down_hebrew_why}")
+
+        with st.expander("🛠️ איך לתקן ב-3 צעדים? (לחץ כאן)", expanded=True):
+            st.markdown(down_hebrew_action)
 
 # Top Status Indicators
 status_col1, status_col2, status_col3 = st.columns(3)
